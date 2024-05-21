@@ -1,0 +1,39 @@
+name: Build
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build.yml'
+      - 'lib/**'
+      - 'gradle/**'
+      - 'settings.gradle'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Extract libfmjni.so
+        run: unzip lib/build/outputs/aar/lib-release.aar jni/arm64-v8a/libfmjni.so
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: FMRadio-fmjni
+          path: jni/arm64-v8a/libfmjni.so
